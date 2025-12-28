@@ -3,6 +3,7 @@ use crate::{config::Config, state::CountdownTimer};
 use bevy::{prelude::*, sprite::Anchor};
 
 #[derive(Component)]
+#[require(Text)]
 pub struct ScoreDisplay;
 
 pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Config>) {
@@ -17,7 +18,7 @@ pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Con
             left: px(visuals.score_padding),
             ..default()
         },
-        Text::new("SCORE 000000"),
+        Text::new("SCORE 00000000"),
         TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),
@@ -32,7 +33,7 @@ pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Con
             right: px(visuals.score_padding),
             ..default()
         },
-        Text::new("000000 TARGET"),
+        Text::new("00000000 TARGET"),
         TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),

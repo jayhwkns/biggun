@@ -31,7 +31,12 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
-            (physics::move_objects, fish::handle_spawn, hook::check_fish),
+            (
+                physics::move_objects,
+                fish::handle_spawn,
+                hook::check_fish,
+                hook::check_extraction,
+            ),
         )
         .run();
 }

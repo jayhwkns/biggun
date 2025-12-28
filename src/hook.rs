@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::fish::{self, Fish};
 use crate::physics::Velocity;
 use crate::state::State;
+use crate::ui::ScoreDisplay;
 use bevy::prelude::*;
 
 /// Controllable hook when fishing
@@ -48,15 +49,6 @@ pub fn handle_input(
 
     let mut vertical_resistance = 1.;
 
-    // Have fish pull on hook if hooked
-    if let Some(hooked_fish) = hooked_fish {
-        // You can reel easier if you're not pulling in a direction
-        if velocity.x.abs() > 0.5 {
-            vertical_resistance = 4.;
-        }
-        velocity.x = hooked_fish.get_hook_velocity(hook, &velocity.0);
-    }
-
     let upper_bound = config.water_level;
     let lower_bound = config.water_level - state.cur_stage(&config).water_depth;
     velocity.y = if keyboard_input.pressed(KeyCode::Space) {
@@ -70,9 +62,47 @@ pub fn handle_input(
         velocity.y = 0.;
     }
 
+    // Have fish pull on hook if hooked
+    if let Some(hooked_fish) = hooked_fish {
+        // You can reel easier if you're not pulling in a direction
+        if velocity.x.abs() > 0.5 {
+            vertical_resistance = 4.;
+        }
+        velocity.x = hooked_fish.get_hook_velocity(hook, &velocity.0);
+    }
+
     // Make guy face towards hook
     let (mut guy_sprite, guy_transform) = guy.into_inner();
     guy_sprite.flip_x = transform.translation.x < guy_transform.translation.x;
+}
+
+/// Extracts a hooked fish when the hook reaches the surface and adds to score
+pub fn check_extraction(
+    mut commands: Commands,
+    hook_transform: Single<(&mut Transform, &mut Hook), Without<fish::Hooked>>,
+    hooked_fish: Option<Single<(Entity, &Fish, &Transform), With<fish::Hooked>>>,
+    mut state: ResMut<State>,
+    score_display: Single<&mut Text, With<ScoreDisplay>>,
+    config: Res<Config>,
+) {
+    // How close the hook mut be to the surface of the water to register the
+    // extraction
+    const SURFACE_DIST: f32 = 0.1;
+    if let None = hooked_fish {
+        return;
+    }
+    let (entity, hooked_fish, transform) = hooked_fish.unwrap().into_inner();
+    let (mut hook_transform, mut hook) = hook_transform.into_inner();
+    let mut score_display = score_display.into_inner();
+
+    if transform.translation.y >= config.water_level - SURFACE_DIST {
+        // Extraction has occured
+        state.score += hooked_fish.get_score();
+        score_display.0 = format!("{:08}", state.score);
+        commands.entity(entity).despawn();
+        hook_transform.translation = Vec3::new(0., config.water_level, 0.);
+        hook.hooked = false;
+    }
 }
 
 /// Checks all fish if we are able to hook onto them

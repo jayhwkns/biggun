@@ -15,7 +15,7 @@ pub struct State {
     /// False when on the main menu
     pub started: bool,
     /// Score of the current stage
-    score: u32,
+    pub score: u32,
 }
 
 impl State {
@@ -38,12 +38,6 @@ impl State {
     pub fn reset(&mut self) {
         *self = State::default();
     }
-
-    pub fn add_to_score(&mut self, add: u32, display: Single<&mut Text, With<ScoreDisplay>>) {
-        self.score += add;
-        let mut text = display.into_inner();
-        text.0 = format!("{:08}", self.score);
-    }
 }
 
 impl Default for State {
@@ -52,6 +46,7 @@ impl Default for State {
             fish_count: 0,
             stage: 0,
             started: false,
+            score: 0,
         }
     }
 }

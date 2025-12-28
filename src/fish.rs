@@ -121,7 +121,7 @@ impl Fish {
     }
 
     /// Gets the scoring value of a fish
-    fn get_score(&self) -> u32 {
+    pub fn get_score(&self) -> u32 {
         self.species.base_score + self.stats.weight.0 * self.stats.length.0
     }
 }
@@ -211,14 +211,24 @@ impl Fish {
         mut commands: Commands,
         asset_server: Res<AssetServer>,
         config: &Res<Config>,
+        state: &State,
     ) {
-        let fish = Fish::new(&species);
+        let mut fish = Fish::new(&species);
+
+        // If under floor, re-roll depth with a floor as a boundary
+        let floor_depth = state.cur_stage(config).water_depth as u32;
+        if fish.stats.depth.0 > floor_depth {
+            let w_depth = rand::random::<f32>();
+            fish.stats.depth = species.base_stats.depth.lerp(&Inches(floor_depth), w_depth)
+        }
         let y = config.water_level - fish.stats.depth.0 as f32;
+
         let facing_left = fish.stats.heading == Heading::Left;
         let invert = if facing_left { -1. } else { 1. };
         let speed = fish.get_speed();
         // 1in -> 1px
         let scale = fish.stats.length.0 as f32 / fish.species.img_size.x;
+
         commands.spawn((
             fish,
             Sprite {
@@ -320,8 +330,14 @@ pub fn handle_spawn(
     if spawn_handler.timer.is_finished() && fish_count < max_fish {
         let new_interval: f32 = 5.0 * rand::random::<f32>() + 1.0;
         spawn_handler.timer = Timer::from_seconds(new_interval, TimerMode::Once);
-        Fish::spawn_new(&Species::BASS, commands, asset_server, &config);
         state.fish_count += 1;
+        Fish::spawn_new(
+            &Species::BASS,
+            commands,
+            asset_server,
+            &config,
+            &state.into_inner(),
+        );
     }
     spawn_handler.timer.tick(time.delta());
 }
