@@ -1,5 +1,7 @@
 //! Movable hook and all related player components
 
+use std::f32::consts::PI;
+
 use crate::config::Config;
 use crate::fish::{self, Fish};
 use crate::physics::Velocity;
@@ -33,16 +35,20 @@ impl Hook {
 #[require(Sprite)]
 pub struct Guy;
 
+/// Visual rod that follows the hook
+#[derive(Component)]
+#[require(Sprite)]
+pub struct Rod;
+
 /// Adjusts the hook's velocity according to user input
 pub fn handle_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    hook_entity: Single<(&mut Velocity, &Transform, &Hook)>,
-    guy: Single<(&mut Sprite, &Transform), With<Guy>>,
+    hook: Single<(&mut Velocity, &Transform, &Hook)>,
     hooked_fish: Option<Single<&Fish, With<fish::Hooked>>>,
     config: Res<Config>,
     state: Res<State>,
 ) {
-    let (mut velocity, transform, hook) = hook_entity.into_inner();
+    let (mut velocity, transform, hook) = hook.into_inner();
 
     // Set initial horizontal velocity from keyboard input
     velocity.0 = Vec2::new(0., 0.);
@@ -57,6 +63,14 @@ pub fn handle_input(
 
     let upper_bound = config.water_level;
     let lower_bound = config.water_level - state.cur_stage(&config).water_depth;
+    // Have fish pull on hook if hooked
+    if let Some(hooked_fish) = hooked_fish {
+        // You can reel easier if you're not pulling in a direction
+        if velocity.x.abs() > 0.5 {
+            vertical_resistance = 4.;
+        }
+        velocity.x = hooked_fish.get_hook_velocity(hook, &velocity.0);
+    }
     velocity.y = if keyboard_input.pressed(KeyCode::Space) {
         hook.reel_speed / vertical_resistance
     } else {
@@ -67,19 +81,29 @@ pub fn handle_input(
     } else if transform.translation.y < lower_bound && velocity.y < 0. {
         velocity.y = 0.;
     }
+}
 
-    // Have fish pull on hook if hooked
-    if let Some(hooked_fish) = hooked_fish {
-        // You can reel easier if you're not pulling in a direction
-        if velocity.x.abs() > 0.5 {
-            vertical_resistance = 4.;
-        }
-        velocity.x = hooked_fish.get_hook_velocity(hook, &velocity.0);
-    }
+/// Makes fisherman follow the hook visually
+pub fn guy_follow_hook(
+    guy: Single<(&mut Sprite, &Transform), With<Guy>>,
+    rod: Single<&mut Transform, (With<Rod>, Without<Hook>, Without<Guy>)>,
+    hook_transform: Single<&Transform, With<Hook>>,
+) {
+    // How far the hook must be for the rod to be fully extended
+    const ROD_EXTEND: f32 = 64.;
+
+    let hook_transform = hook_transform.into_inner();
 
     // Make guy face towards hook
     let (mut guy_sprite, guy_transform) = guy.into_inner();
-    guy_sprite.flip_x = transform.translation.x < guy_transform.translation.x;
+    guy_sprite.flip_x = hook_transform.translation.x < guy_transform.translation.x;
+
+    // Rotate rod towards hook
+    let mut rod_transform = rod.into_inner();
+    let hook_rod_dist =
+        (hook_transform.translation.x - rod_transform.translation.x).clamp(-ROD_EXTEND, ROD_EXTEND);
+    let rod_rot = (PI / 2.) + (PI / 2.) * ops::sin((PI * hook_rod_dist) / (2. * ROD_EXTEND));
+    rod_transform.rotation = Quat::from_euler(EulerRot::XYZ, 0., rod_rot, 0.);
 }
 
 /// Extracts a hooked fish when the hook reaches the surface and adds to score

@@ -42,6 +42,7 @@ fn main() {
                 fish::update_fish,
                 fish::struggle,
                 state::CountdownTimer::tick,
+                hook::guy_follow_hook,
             ),
         )
         .add_systems(
@@ -162,7 +163,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
         },
     ));
 
-    // Fisherman
+    // Fisherman & Fishing Rod
     commands.spawn((
         Sprite {
             image: asset_server.load("fisherman.png"),
@@ -173,6 +174,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
             ..default()
         },
         hook::Guy,
+    ));
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("rod.png"),
+            ..default()
+        },
+        Anchor::BOTTOM_RIGHT,
+        Transform {
+            translation: Vec3::new(0., config.water_level + 10., 1.),
+            ..default()
+        },
+        hook::Rod,
     ));
 
     commands.spawn(fish::SpawnHandler {
