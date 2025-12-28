@@ -80,7 +80,7 @@ pub fn handle_input(
 pub fn check_extraction(
     mut commands: Commands,
     hook_transform: Single<(&mut Transform, &mut Hook), Without<fish::Hooked>>,
-    hooked_fish: Option<Single<(Entity, &Fish, &Transform), With<fish::Hooked>>>,
+    hooked_fish: Single<(Entity, &Fish, &Transform), With<fish::Hooked>>,
     mut state: ResMut<State>,
     score_display: Single<&mut Text, With<ScoreDisplay>>,
     config: Res<Config>,
@@ -88,10 +88,7 @@ pub fn check_extraction(
     // How close the hook mut be to the surface of the water to register the
     // extraction
     const SURFACE_DIST: f32 = 0.1;
-    if let None = hooked_fish {
-        return;
-    }
-    let (entity, hooked_fish, transform) = hooked_fish.unwrap().into_inner();
+    let (entity, hooked_fish, transform) = hooked_fish.into_inner();
     let (mut hook_transform, mut hook) = hook_transform.into_inner();
     let mut score_display = score_display.into_inner();
 
