@@ -6,6 +6,10 @@ use bevy::{prelude::*, sprite::Anchor};
 #[require(Text)]
 pub struct ScoreDisplay;
 
+/// Despawns on game start
+#[derive(Component)]
+pub struct MainMenuItem;
+
 pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Config>) {
     let font = assets.load("kodemono.ttf");
     let visuals = &config.visuals;
@@ -55,6 +59,39 @@ pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Con
         CountdownTimer {
             timer: Timer::new(config.sample_stage.time, TimerMode::Once),
         },
+    ));
+}
+
+pub fn init_main_menu(mut commands: Commands, assets: Res<AssetServer>, config: Res<Config>) {
+    let font = assets.load("kodemono.ttf");
+    let visuals = &config.visuals;
+
+    // Logo
+    let image_node = ImageNode::new(assets.load("logo.png"));
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            height: percent(100. / 3.),
+            aspect_ratio: Some(2.),
+            ..default()
+        },
+        image_node,
+        MainMenuItem,
+    ));
+
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            top: percent(50),
+            ..default()
+        },
+        Text::new("press [ENTER] to start"),
+        TextFont::from(font.clone()).with_font_size(visuals.info_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        MainMenuItem,
     ));
 }
 

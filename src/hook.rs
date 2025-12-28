@@ -22,6 +22,12 @@ pub struct Hook {
     pub catch_radius: f32,
 }
 
+impl Hook {
+    pub fn start_pos(config: &Config) -> Vec3 {
+        Vec3::new(0.0, config.water_level, 0.0)
+    }
+}
+
 /// Literally just a guy
 #[derive(Component)]
 #[require(Sprite)]
@@ -95,7 +101,7 @@ pub fn check_extraction(
     if transform.translation.y >= config.water_level - SURFACE_DIST {
         // Extraction has occured
         state.score += hooked_fish.get_score();
-        score_display.0 = format!("{:08}", state.score);
+        score_display.0 = format!("SCORE {:08}", state.score);
         commands.entity(entity).despawn();
         hook_transform.translation = Vec3::new(0., config.water_level, 0.);
         hook.hooked = false;

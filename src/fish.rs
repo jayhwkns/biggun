@@ -378,11 +378,8 @@ pub fn update_fish(
 }
 
 /// Allows fish to periodically change direction using random timers
-pub fn struggle(fish_query: Option<Single<&mut Fish, With<Hooked>>>, time: Res<Time>) {
-    if let None = fish_query {
-        return;
-    }
-    let mut fish = fish_query.unwrap();
+pub fn struggle(fish_query: Single<&mut Fish, With<Hooked>>, time: Res<Time>) {
+    let mut fish = fish_query.into_inner();
     if fish.state.timer.is_finished() {
         let new_interval: f32 = (fish.species.struggle_time * rand::random::<f32>())
             .clamp(Species::MIN_STRUGGLE, Species::MAX_STRUGGLE);
@@ -396,4 +393,15 @@ pub fn struggle(fish_query: Option<Single<&mut Fish, With<Hooked>>>, time: Res<T
         };
     }
     fish.state.timer.tick(time.delta());
+}
+
+pub fn despawn_all(
+    fish: Query<Entity, With<Fish>>,
+    mut commands: Commands,
+    mut state: ResMut<State>,
+) {
+    for entity in fish {
+        commands.entity(entity).despawn();
+    }
+    state.fish_count = 0;
 }

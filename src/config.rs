@@ -27,6 +27,7 @@ pub struct VisualConfig {
     pub score_padding: f32,
     /// Opacity of box covering out-of-bounds region
     pub blinds_opacity: f32,
+    pub info_font_size: f32,
 }
 
 #[derive(Resource)]
@@ -59,7 +60,7 @@ impl Default for Config {
             }],
             sample_stage: StageConfig {
                 target_score: 0,
-                water_depth: 130.,
+                water_depth: 200.,
                 max_fish: 20,
                 species: vec![Species::BASS],
                 time: Duration::from_secs_f32(0.),
@@ -68,6 +69,7 @@ impl Default for Config {
                 score_font_size: 32.,
                 score_padding: 5.,
                 blinds_opacity: 0.8,
+                info_font_size: 18.,
             },
         }
     }

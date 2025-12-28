@@ -1,6 +1,10 @@
 //! Contain and manipulate game state and score
+use std::time::Duration;
+
 use crate::{
     config::{Config, StageConfig},
+    fish::{self, Fish},
+    hook::Hook,
     ui::ScoreDisplay,
 };
 use bevy::prelude::*;
@@ -70,8 +74,31 @@ impl CountdownTimer {
             text.0 = format!("{display_num}");
         }
     }
+
+    /// Resets the timer with a new time
+    pub fn reset_timer(&mut self, new_time: Duration) {
+        self.timer = Timer::new(new_time, TimerMode::Once);
+    }
 }
 
 #[derive(Component)]
 #[require(Sprite, Transform)]
 pub struct Floor;
+
+/// Transitions to `state`'s current stage
+pub fn stage_transition(
+    config: Res<Config>,
+    mut state: ResMut<State>,
+    mut commands: Commands,
+    floor: Single<&mut Transform, With<Floor>>,
+    fish: Query<Entity, With<Fish>>,
+    countdown_timer: Single<&mut CountdownTimer>,
+) {
+    let stage = state.cur_stage(&config);
+
+    fish::despawn_all(fish, commands, state);
+    let mut floor_transform = floor.into_inner();
+    floor_transform.translation.y = config.water_level - stage.water_depth;
+
+    countdown_timer.into_inner().reset_timer(stage.time);
+}

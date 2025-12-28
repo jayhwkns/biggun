@@ -2,11 +2,21 @@ use bevy::{
     core_pipeline::tonemapping::Tonemapping, post_process::bloom::Bloom, prelude::*, sprite::Anchor,
 };
 
+use crate::{
+    config::Config,
+    fish::Fish,
+    hook::Hook,
+    input::GameStarted,
+    state::{CountdownTimer, Floor, State},
+    ui::MainMenuItem,
+};
+
 const BG_COLOR: Color = Color::srgb(0.01, 0.01, 0.01);
 
 mod config;
 mod fish;
 mod hook;
+mod input;
 mod physics;
 mod state;
 mod ui;
@@ -19,11 +29,16 @@ fn main() {
         .insert_resource(ClearColor(BG_COLOR))
         .insert_resource(state::State::default())
         .insert_resource(config::Config::default())
-        .add_systems(Startup, (setup, ui::init_ui, ui::init_blinds))
+        .add_observer(on_game_start)
+        .add_systems(
+            Startup,
+            (setup, ui::init_ui, ui::init_blinds, ui::init_main_menu),
+        )
         .add_systems(
             Update,
             (
                 hook::handle_input,
+                input::handle_input,
                 fish::update_fish,
                 fish::struggle,
                 state::CountdownTimer::tick,
@@ -39,6 +54,23 @@ fn main() {
             ),
         )
         .run();
+}
+
+fn on_game_start(
+    _event: On<GameStarted>,
+    mut commands: Commands,
+    mut state: ResMut<State>,
+    config: Res<Config>,
+    menu_items: Query<Entity, With<MainMenuItem>>,
+    floor: Single<&mut Transform, With<Floor>>,
+    fish: Query<Entity, With<Fish>>,
+    mut countdown_timer: Single<&mut CountdownTimer>,
+) {
+    for item in menu_items {
+        commands.entity(item).despawn();
+    }
+    state.started = true;
+    state::stage_transition(config, state, commands, floor, fish, countdown_timer);
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<config::Config>) {
@@ -63,7 +95,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
             ..default()
         },
         Transform {
-            translation: Vec3::new(0.0, config.water_level, 0.0),
+            translation: Hook::start_pos(&config),
             ..default()
         },
         hook::Hook {
