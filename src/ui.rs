@@ -1,0 +1,85 @@
+//! User Interface such as scoring HUD and main menu
+use crate::{config::Config, state::CountdownTimer};
+use bevy::{prelude::*, sprite::Anchor};
+
+#[derive(Component)]
+pub struct ScoreDisplay;
+
+pub fn init_ui(mut commands: Commands, assets: Res<AssetServer>, config: Res<Config>) {
+    let font = assets.load("kodemono.ttf");
+    let visuals = &config.visuals;
+
+    // Score
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            left: px(visuals.score_padding),
+            ..default()
+        },
+        Text::new("SCORE 000000"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        ScoreDisplay,
+    ));
+
+    // Target score
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            right: px(visuals.score_padding),
+            ..default()
+        },
+        Text::new("000000 TARGET"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+    ));
+
+    // Countdown
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            width: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        Text::new("30"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        CountdownTimer {
+            timer: Timer::new(config.sample_stage.time, TimerMode::Once),
+        },
+    ));
+}
+
+/// Initializes the black boxes that cover the out of bounds area in world space
+pub fn init_blinds(mut commands: Commands, config: Res<Config>) {
+    let visuals = &config.visuals;
+
+    // Left blind
+    commands.spawn((
+        Sprite::from_color(Color::srgba(0., 0., 0., visuals.blinds_opacity), Vec2::ONE),
+        Anchor::CENTER_RIGHT,
+        Transform {
+            translation: Vec3::new(-config.game_width, 0., 100.),
+            scale: Vec3::new(10000., 10000., 1.),
+            ..default()
+        },
+    ));
+
+    // Right blind
+    commands.spawn((
+        Sprite::from_color(Color::srgba(0., 0., 0., visuals.blinds_opacity), Vec2::ONE),
+        Anchor::CENTER_LEFT,
+        Transform {
+            translation: Vec3::new(config.game_width, 0., 100.),
+            scale: Vec3::new(10000., 10000., 1.),
+            ..default()
+        },
+    ));
+}
