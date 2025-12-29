@@ -28,6 +28,8 @@ pub struct VisualConfig {
     /// Opacity of box covering out-of-bounds region
     pub blinds_opacity: f32,
     pub info_font_size: f32,
+    /// Width of the fishing line in world scale
+    pub line_width: f32,
 }
 
 #[derive(Resource)]
@@ -70,6 +72,7 @@ impl Default for Config {
                 score_padding: 5.,
                 blinds_opacity: 0.8,
                 info_font_size: 18.,
+                line_width: 0.5,
             },
         }
     }

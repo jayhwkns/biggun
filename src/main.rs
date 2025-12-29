@@ -1,6 +1,7 @@
 use bevy::{
     core_pipeline::tonemapping::Tonemapping, post_process::bloom::Bloom, prelude::*, sprite::Anchor,
 };
+use bevy_prototype_lyon::prelude::*;
 
 use crate::{
     config::Config,
@@ -26,6 +27,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(
             ImagePlugin::default_nearest(), // Use pixel perfect sprites
         ))
+        .add_plugins(ShapePlugin)
         .insert_resource(ClearColor(BG_COLOR))
         .insert_resource(state::State::default())
         .insert_resource(config::Config::default())
@@ -65,29 +67,13 @@ fn on_game_start(
     menu_items: Query<Entity, With<MainMenuItem>>,
     floor: Single<&mut Transform, With<Floor>>,
     fish: Query<Entity, With<Fish>>,
-    mut countdown_timer: Single<&mut CountdownTimer>,
+    countdown_timer: Single<&mut CountdownTimer>,
+    asset_server: Res<AssetServer>,
 ) {
     for item in menu_items {
         commands.entity(item).despawn();
     }
     state.started = true;
-    state::stage_transition(config, state, commands, floor, fish, countdown_timer);
-}
-
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<config::Config>) {
-    // Camera
-    commands.spawn((
-        Camera2d,
-        Tonemapping::TonyMcMapface,
-        Bloom {
-            intensity: 0.25,
-            ..default()
-        },
-        Transform {
-            scale: Vec3::new(0.5, 0.5, 1.),
-            ..default()
-        },
-    ));
 
     // Hook
     commands.spawn((
@@ -107,6 +93,43 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
             catch_radius: 8.,
         },
         physics::Velocity(Vec2::ZERO),
+    ));
+
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("rod.png"),
+            ..default()
+        },
+        Anchor::BOTTOM_RIGHT,
+        Transform {
+            translation: Vec3::new(0., config.water_level + 10., 1.),
+            ..default()
+        },
+        hook::Rod,
+    ));
+    let line = shapes::Line(Vec2::ZERO, Vec2::new(0.0, -100.0));
+    commands.spawn(
+        ShapeBuilder::with(&line)
+            .stroke((Color::WHITE, config.visuals.line_width))
+            .build(),
+    );
+
+    state::stage_transition(config, state, commands, floor, fish, countdown_timer);
+}
+
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<config::Config>) {
+    // Camera
+    commands.spawn((
+        Camera2d,
+        Tonemapping::TonyMcMapface,
+        Bloom {
+            intensity: 0.25,
+            ..default()
+        },
+        Transform {
+            scale: Vec3::new(0.5, 0.5, 1.),
+            ..default()
+        },
     ));
 
     // Water
@@ -163,7 +186,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
         },
     ));
 
-    // Fisherman & Fishing Rod
+    // Fisherman
     commands.spawn((
         Sprite {
             image: asset_server.load("fisherman.png"),
@@ -174,18 +197,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<con
             ..default()
         },
         hook::Guy,
-    ));
-    commands.spawn((
-        Sprite {
-            image: asset_server.load("rod.png"),
-            ..default()
-        },
-        Anchor::BOTTOM_RIGHT,
-        Transform {
-            translation: Vec3::new(0., config.water_level + 10., 1.),
-            ..default()
-        },
-        hook::Rod,
     ));
 
     commands.spawn(fish::SpawnHandler {
