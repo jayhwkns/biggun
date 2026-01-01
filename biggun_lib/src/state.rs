@@ -11,7 +11,7 @@ use bevy::prelude::*;
 
 /// Resource data pertaining to the state of the game
 #[derive(Resource)]
-pub struct State {
+pub struct GameState {
     /// The current number of fish in the game
     pub fish_count: u32,
     /// The stage we're on, used as an index for `stages` in config
@@ -22,7 +22,7 @@ pub struct State {
     pub score: u32,
 }
 
-impl State {
+impl GameState {
     /// Gets current stage or uses `config.sample_stage` as a fallback. Final
     /// stage in config gets repeated forever, but `stage` can still count up.
     pub fn cur_stage<'a>(&self, config: &'a Config) -> &'a StageConfig {
@@ -40,13 +40,13 @@ impl State {
 
     /// Resets state to intial (`default()`) values
     pub fn reset(&mut self) {
-        *self = State::default();
+        *self = GameState::default();
     }
 }
 
-impl Default for State {
+impl Default for GameState {
     fn default() -> Self {
-        State {
+        GameState {
             fish_count: 0,
             stage: 0,
             started: false,
@@ -88,7 +88,7 @@ pub struct Floor;
 /// Transitions to `state`'s current stage
 pub fn stage_transition(
     config: Res<Config>,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
     mut commands: Commands,
     floor: Single<&mut Transform, With<Floor>>,
     fish: Query<Entity, With<Fish>>,

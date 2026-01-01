@@ -2,35 +2,22 @@ use bevy::{
     core_pipeline::tonemapping::Tonemapping, post_process::bloom::Bloom, prelude::*, sprite::Anchor,
 };
 use bevy_prototype_lyon::prelude::*;
-
-use crate::{
-    config::Config,
-    fish::Fish,
-    hook::Hook,
-    input::GameStarted,
-    state::{CountdownTimer, Floor, State},
-    ui::MainMenuItem,
-};
+use biggun_lib::prelude::*;
 
 const BG_COLOR: Color = Color::srgb(0.01, 0.01, 0.01);
 
-mod config;
-mod fish;
-mod hook;
-mod input;
-mod physics;
-mod state;
-mod ui;
-
 fn main() {
     App::new()
+        // Official bevy plugins
         .add_plugins(DefaultPlugins.set(
             ImagePlugin::default_nearest(), // Use pixel perfect sprites
         ))
+        // External plugins
         .add_plugins(ShapePlugin)
+        // Custom, biggun specific, plugins
         .insert_resource(ClearColor(BG_COLOR))
-        .insert_resource(state::State::default())
-        .insert_resource(config::Config::default())
+        .insert_resource(GameState::default())
+        .insert_resource(Config::default())
         .add_observer(on_game_start)
         .add_systems(
             Startup,
@@ -62,7 +49,7 @@ fn main() {
 fn on_game_start(
     _event: On<GameStarted>,
     mut commands: Commands,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
     config: Res<Config>,
     menu_items: Query<Entity, With<MainMenuItem>>,
     floor: Single<&mut Transform, With<Floor>>,
@@ -117,7 +104,7 @@ fn on_game_start(
     state::stage_transition(config, state, commands, floor, fish, countdown_timer);
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<config::Config>) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<Config>) {
     // Camera
     commands.spawn((
         Camera2d,

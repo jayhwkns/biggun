@@ -1,7 +1,7 @@
 use crate::physics::Velocity;
 use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
-use crate::{config::Config, hook::Hook, physics, state::State};
+use crate::{config::Config, hook::Hook, physics, state::GameState};
 
 #[derive(Clone)]
 pub struct Ounces(u32);
@@ -211,7 +211,7 @@ impl Fish {
         mut commands: Commands,
         asset_server: Res<AssetServer>,
         config: &Res<Config>,
-        state: &State,
+        state: &GameState,
     ) {
         let mut fish = Fish::new(&species);
 
@@ -321,7 +321,7 @@ pub fn handle_spawn(
     commands: Commands,
     mut spawn_handler: Single<&mut SpawnHandler>,
     config: Res<Config>,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
 ) {
@@ -348,7 +348,7 @@ pub fn update_fish(
     hook_single: Single<(&Transform, &mut Hook), Without<Fish>>,
     mut commands: Commands,
     config: Res<Config>,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
     time: Res<Time>,
 ) {
     let (hook_transform, mut hook) = hook_single.into_inner();
@@ -398,7 +398,7 @@ pub fn struggle(fish_query: Single<&mut Fish, With<Hooked>>, time: Res<Time>) {
 pub fn despawn_all(
     fish: Query<Entity, With<Fish>>,
     mut commands: Commands,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
 ) {
     for entity in fish {
         commands.entity(entity).despawn();

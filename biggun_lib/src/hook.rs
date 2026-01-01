@@ -5,7 +5,7 @@ use std::f32::consts::PI;
 use crate::config::Config;
 use crate::fish::{self, Fish};
 use crate::physics::Velocity;
-use crate::state::State;
+use crate::state::GameState;
 use crate::ui::ScoreDisplay;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::tess::geom::euclid::Point2D;
@@ -50,7 +50,7 @@ pub fn handle_input(
     hook: Single<(&mut Velocity, &Transform, &Hook)>,
     hooked_fish: Option<Single<&Fish, With<fish::Hooked>>>,
     config: Res<Config>,
-    state: Res<State>,
+    state: Res<GameState>,
 ) {
     let (mut velocity, transform, hook) = hook.into_inner();
 
@@ -132,7 +132,7 @@ pub fn check_extraction(
     mut commands: Commands,
     hook_transform: Single<(&mut Transform, &mut Hook), Without<fish::Hooked>>,
     hooked_fish: Single<(Entity, &Fish, &Transform), With<fish::Hooked>>,
-    mut state: ResMut<State>,
+    mut state: ResMut<GameState>,
     score_display: Single<&mut Text, With<ScoreDisplay>>,
     config: Res<Config>,
 ) {

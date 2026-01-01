@@ -1529,6 +1529,15 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_prototype_lyon",
+ "biggun_lib",
+]
+
+[[package]]
+name = "biggun_lib"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_prototype_lyon",
  "rand",
 ]
 
