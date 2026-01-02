@@ -17,7 +17,6 @@ fn main() {
         .insert_resource(ClearColor(BG_COLOR))
         .insert_resource(GameState::default())
         .insert_resource(Config::default())
-        .add_systems(Startup, (ui::init_ui, ui::init_blinds, ui::init_main_menu))
         .add_systems(
             Update,
             (

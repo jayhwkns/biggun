@@ -8,7 +8,7 @@ use crate::{
     physics::Velocity,
     state,
     state::{CountdownTimer, Floor, GameState},
-    ui::MainMenuItem,
+    ui::{MainMenuItem, ScoreDisplay},
 };
 use bevy::{
     core_pipeline::tonemapping::Tonemapping, post_process::bloom::Bloom, prelude::*, sprite::Anchor,
@@ -110,6 +110,38 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
     commands.spawn(SpawnHandler {
         timer: Timer::from_seconds(1.0, TimerMode::Once),
     });
+
+    // UI
+    let font = asset_server.load("kodemono.ttf");
+    let visuals = &config.visuals;
+
+    // Logo
+    let image_node = ImageNode::new(asset_server.load("logo.png"));
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            height: percent(100. / 3.),
+            aspect_ratio: Some(2.),
+            ..default()
+        },
+        image_node,
+        MainMenuItem,
+    ));
+
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            top: percent(50),
+            ..default()
+        },
+        Text::new("press [ENTER] to start"),
+        TextFont::from(font.clone()).with_font_size(visuals.info_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        MainMenuItem,
+    ));
 }
 
 /// Loads into the core gameplay loop **from main menu**.
@@ -119,9 +151,6 @@ fn load_game(
     mut state: ResMut<GameState>,
     config: Res<Config>,
     menu_items: Query<Entity, With<MainMenuItem>>,
-    floor: Single<&mut Transform, With<Floor>>,
-    fish: Query<Entity, With<Fish>>,
-    countdown_timer: Single<&mut CountdownTimer>,
     asset_server: Res<AssetServer>,
 ) {
     for item in menu_items {
@@ -168,5 +197,76 @@ fn load_game(
             .build(),
     );
 
-    state::stage_transition(config, state, commands, floor, fish, countdown_timer);
+    // UI
+    let font = asset_server.load("kodemono.ttf");
+    let visuals = &config.visuals;
+
+    // Score
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            left: px(visuals.score_padding),
+            ..default()
+        },
+        Text::new("SCORE 00000000"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        ScoreDisplay,
+    ));
+
+    // Target score
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            right: px(visuals.score_padding),
+            ..default()
+        },
+        Text::new("00000000 TARGET"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+    ));
+
+    // Countdown
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(visuals.score_padding),
+            width: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        Text::new("30"),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        CountdownTimer {
+            timer: Timer::new(config.sample_stage.time, TimerMode::Once),
+        },
+    ));
+
+    // Left blind
+    commands.spawn((
+        Sprite::from_color(Color::srgba(0., 0., 0., visuals.blinds_opacity), Vec2::ONE),
+        Anchor::CENTER_RIGHT,
+        Transform {
+            translation: Vec3::new(-config.game_width, 0., 100.),
+            scale: Vec3::new(10000., 10000., 1.),
+            ..default()
+        },
+    ));
+
+    // Right blind
+    commands.spawn((
+        Sprite::from_color(Color::srgba(0., 0., 0., visuals.blinds_opacity), Vec2::ONE),
+        Anchor::CENTER_LEFT,
+        Transform {
+            translation: Vec3::new(config.game_width, 0., 100.),
+            scale: Vec3::new(10000., 10000., 1.),
+            ..default()
+        },
+    ));
 }
