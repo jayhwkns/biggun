@@ -3,9 +3,7 @@ use std::time::Duration;
 
 use crate::{
     config::{Config, StageConfig},
-    fish::{self, Fish},
-    hook::Hook,
-    ui::ScoreDisplay,
+    fish::Fish,
 };
 use bevy::prelude::*;
 
@@ -96,7 +94,9 @@ pub fn stage_transition(
 ) {
     let stage = state.cur_stage(&config);
 
-    fish::despawn_all(fish, commands, state);
+    fish.iter().for_each(|entity| {
+        commands.entity(entity).despawn();
+    });
     let mut floor_transform = floor.into_inner();
     floor_transform.translation.y = config.water_level - stage.water_depth;
 

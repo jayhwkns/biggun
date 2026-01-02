@@ -394,14 +394,3 @@ pub fn struggle(fish_query: Single<&mut Fish, With<Hooked>>, time: Res<Time>) {
     }
     fish.state.timer.tick(time.delta());
 }
-
-pub fn despawn_all(
-    fish: Query<Entity, With<Fish>>,
-    mut commands: Commands,
-    mut state: ResMut<GameState>,
-) {
-    for entity in fish {
-        commands.entity(entity).despawn();
-    }
-    state.fish_count = 0;
-}

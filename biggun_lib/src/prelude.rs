@@ -4,8 +4,8 @@ pub use crate::{
     config::Config,
     fish::{self, Fish},
     hook::{self, Hook},
-    input::{self, GameStarted},
-    physics,
+    input, physics,
+    scenes::BiggunScenePlugin,
     state::{self, CountdownTimer, Floor, GameState},
     ui::{self, MainMenuItem},
 };
