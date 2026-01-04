@@ -6,6 +6,6 @@ pub use crate::{
     hook::{self, Hook},
     input, physics,
     scenes::BiggunScenePlugin,
-    state::{self, CountdownTimer, Floor, GameState},
+    state::{self, CountdownTimer, Floor, GameState, GameStateManagerPlugin},
     ui::{self, MainMenuItem},
 };

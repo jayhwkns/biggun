@@ -4,3 +4,6 @@ use bevy::prelude::*;
 
 #[derive(Event)]
 pub struct StartGameEvent;
+
+#[derive(Event)]
+pub struct NextStageEvent;

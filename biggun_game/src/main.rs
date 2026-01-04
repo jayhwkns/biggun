@@ -13,7 +13,7 @@ fn main() {
         // External plugins
         .add_plugins(ShapePlugin)
         // Custom, biggun specific, plugins
-        .add_plugins((BiggunScenePlugin))
+        .add_plugins((BiggunScenePlugin, GameStateManagerPlugin))
         .insert_resource(ClearColor(BG_COLOR))
         .insert_resource(GameState::default())
         .insert_resource(Config::default())

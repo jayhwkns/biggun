@@ -3,9 +3,18 @@ use std::time::Duration;
 
 use crate::{
     config::{Config, StageConfig},
+    events::NextStageEvent,
     fish::Fish,
 };
 use bevy::prelude::*;
+
+pub struct GameStateManagerPlugin;
+
+impl Plugin for GameStateManagerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_observer(stage_transition);
+    }
+}
 
 /// Resource data pertaining to the state of the game
 #[derive(Resource)]
@@ -85,8 +94,9 @@ pub struct Floor;
 
 /// Transitions to `state`'s current stage
 pub fn stage_transition(
+    _event: On<NextStageEvent>,
     config: Res<Config>,
-    mut state: ResMut<GameState>,
+    state: Res<GameState>,
     mut commands: Commands,
     floor: Single<&mut Transform, With<Floor>>,
     fish: Query<Entity, With<Fish>>,

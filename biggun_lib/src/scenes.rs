@@ -2,12 +2,11 @@
 
 use crate::{
     config::Config,
-    events::StartGameEvent,
+    events::{NextStageEvent, StartGameEvent},
     fish::{Fish, SpawnHandler},
     hook::{Guy, Hook, Rod},
     physics::Velocity,
-    state,
-    state::{CountdownTimer, Floor, GameState},
+    state::{self, CountdownTimer, Floor, GameState, stage_transition},
     ui::{MainMenuItem, ScoreDisplay},
 };
 use bevy::{
@@ -269,4 +268,7 @@ fn load_game(
             ..default()
         },
     ));
+
+    // Go to next stage
+    commands.trigger(NextStageEvent);
 }
