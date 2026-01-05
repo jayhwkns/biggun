@@ -10,3 +10,4 @@ pub mod prelude;
 pub mod scenes;
 pub mod state;
 pub mod ui;
+pub(crate) mod utils;

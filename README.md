@@ -18,3 +18,10 @@ unnecessary tight coupling.
 Cross-system communication should mainly be done through *Bevy events*. Bevy
 has a good way of figuring out how to easily call with all of the arguments
 that a system's function needs.
+
+Many Bevy projects mirror the bevy repository, having a crate for each major
+system. This does achieves the same thing and is likely better for larger
+projects, but the systems in this project are relatively small and too dependent,
+so I don't believe it is worth all of the extra organization effort.
+The project obeys more of the *Cargo workspace* project structure described in
+The Rust Book.

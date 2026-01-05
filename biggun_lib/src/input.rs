@@ -1,5 +1,7 @@
 //! Code for input handling
 
+// TODO: Each module should contain it's own input handling. Dissolve this module.
+
 use bevy::prelude::*;
 
 use crate::events::StartGameEvent;
