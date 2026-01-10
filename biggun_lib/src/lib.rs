@@ -1,13 +1,10 @@
 //! The library containing all gameplay systems for Biggun
 
-pub mod config;
+pub mod environment;
 pub(crate) mod events;
-pub mod fish;
-pub mod hook;
+pub mod game_manager;
 pub mod input;
 pub mod physics;
+pub mod player;
 pub mod prelude;
-pub mod scenes;
-pub mod state;
-pub mod ui;
 pub(crate) mod utils;

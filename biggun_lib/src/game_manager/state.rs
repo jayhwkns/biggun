@@ -1,11 +1,10 @@
 //! Contain and manipulate game state and score
 use std::time::Duration;
 
-use crate::{
-    config::{Config, StageConfig},
-    events::NextStageEvent,
-    fish::Fish,
-};
+use crate::environment::fish::Fish;
+
+use super::config::{Config, StageConfig};
+
 use bevy::prelude::*;
 
 pub struct GameStateManagerPlugin;
@@ -15,6 +14,12 @@ impl Plugin for GameStateManagerPlugin {
         app.add_observer(stage_transition);
     }
 }
+
+#[derive(Event)]
+pub struct StartGameEvent;
+
+#[derive(Event)]
+pub struct NextStageEvent;
 
 /// Resource data pertaining to the state of the game
 #[derive(Resource)]
