@@ -7,14 +7,6 @@ use super::config::{Config, StageConfig};
 
 use bevy::prelude::*;
 
-pub struct GameStateManagerPlugin;
-
-impl Plugin for GameStateManagerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_observer(stage_transition);
-    }
-}
-
 #[derive(Event)]
 pub struct StartGameEvent;
 

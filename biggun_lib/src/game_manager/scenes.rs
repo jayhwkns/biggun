@@ -3,7 +3,10 @@
 use crate::{
     environment::fish::SpawnHandler,
     physics::Velocity,
-    player::hook::{Guy, Hook, Rod},
+    player::{
+        fisherman::{Fisherman, FishingLine, Rod},
+        hook::Hook,
+    },
     utils::ui::{MainMenuItem, ScoreDisplay},
 };
 
@@ -21,8 +24,7 @@ pub struct BiggunScenePlugin;
 
 impl Plugin for BiggunScenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_main_menu)
-            .add_observer(load_game);
+        app;
     }
 }
 
@@ -106,7 +108,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             translation: Vec3::new(0., config.water_level + 24., 0.),
             ..default()
         },
-        Guy,
+        Fisherman,
     ));
 
     commands.spawn(SpawnHandler {
@@ -147,7 +149,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
 }
 
 /// Loads into the core gameplay loop **from main menu**.
-fn load_game(
+pub fn load_game(
     _event: On<StartGameEvent>,
     mut commands: Commands,
     mut state: ResMut<GameState>,
@@ -192,12 +194,14 @@ fn load_game(
         },
         Rod,
     ));
+
     let line = shapes::Line(Vec2::ZERO, Vec2::new(0.0, -100.0));
-    commands.spawn(
+    commands.spawn((
         ShapeBuilder::with(&line)
             .stroke((Color::WHITE, config.visuals.line_width))
             .build(),
-    );
+        FishingLine,
+    ));
 
     // UI
     let font = asset_server.load("kodemono.ttf");
