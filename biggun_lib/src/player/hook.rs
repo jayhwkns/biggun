@@ -1,7 +1,5 @@
 //! Movable hook and all related player components
 
-use std::f32::consts::PI;
-
 use crate::{
     environment::fish::{self, Fish},
     game_manager::{config::Config, state::GameState},
@@ -10,7 +8,6 @@ use crate::{
 };
 
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::*;
 
 /// Controllable hook when fishing
 #[derive(Component)]
@@ -99,32 +96,5 @@ pub fn check_extraction(
         commands.entity(entity).despawn();
         hook_transform.translation = Vec3::new(0., config.water_level, 0.);
         hook.hooked = false;
-    }
-}
-
-/// Checks all fish if we are able to hook onto them
-pub fn check_fish(
-    hook_entity: Single<(&Transform, &mut Hook)>,
-    mut fish_query: Query<(Entity, &Transform, &mut Fish, &mut Velocity)>,
-    mut commands: Commands,
-) {
-    let (hook_transform, mut hook) = hook_entity.into_inner();
-    if hook.hooked {
-        return;
-    }
-
-    let hook_position = hook_transform.translation;
-    for (entity, transform, mut fish, mut fish_velocity) in &mut fish_query {
-        let fish_position = transform.translation;
-        let dist = fish_position.distance(hook_position);
-        if dist < hook.catch_radius {
-            hook.hooked = true;
-            fish.state.hooked = true;
-            // We position fish manually while hooked
-            fish_velocity.0 = Vec2::ZERO;
-            // Mark as hooked for easy query
-            commands.entity(entity).insert(fish::Hooked);
-            return;
-        }
     }
 }
