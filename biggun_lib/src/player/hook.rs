@@ -2,15 +2,14 @@
 
 use std::f32::consts::PI;
 
-use crate::config::Config;
-use crate::fish::{self, Fish};
-use crate::physics::Velocity;
-use crate::state::GameState;
-use crate::ui::ScoreDisplay;
+use crate::{
+    environment::fish::{self, Fish},
+    game_manager::{config::Config, state::GameState},
+    physics::Velocity,
+    utils::ui::ScoreDisplay,
+};
+
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::tess::geom::euclid::Point2D;
-use bevy_prototype_lyon::prelude::tess::math::Translation;
-use bevy_prototype_lyon::prelude::tess::path::PositionStore;
 use bevy_prototype_lyon::prelude::*;
 
 /// Controllable hook when fishing

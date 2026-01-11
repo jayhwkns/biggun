@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 
-use crate::events::StartGameEvent;
+use crate::game_manager::state::StartGameEvent;
 
 /// Handles input by triggering events
 pub fn handle_input(keyboard_input: Res<ButtonInput<KeyCode>>, mut commands: Commands) {

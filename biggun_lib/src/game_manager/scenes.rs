@@ -1,16 +1,19 @@
 //! Scene setup and transitioning
 
 use crate::{
-    config::Config,
-    events::{NextStageEvent, StartGameEvent},
-    fish::{Fish, SpawnHandler},
-    hook::{Guy, Hook, Rod},
+    environment::fish::SpawnHandler,
     physics::Velocity,
-    state::{self, CountdownTimer, Floor, GameState, stage_transition},
-    ui::{MainMenuItem, ScoreDisplay},
+    player::hook::{Guy, Hook, Rod},
+    utils::ui::{MainMenuItem, ScoreDisplay},
 };
+
 use bevy::{
     core_pipeline::tonemapping::Tonemapping, post_process::bloom::Bloom, prelude::*, sprite::Anchor,
+};
+
+use super::{
+    config::Config,
+    state::{self, CountdownTimer, GameState, NextStageEvent, StartGameEvent},
 };
 use bevy_prototype_lyon::prelude::*;
 

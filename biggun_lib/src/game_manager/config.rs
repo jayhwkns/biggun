@@ -1,7 +1,7 @@
 //! Configuration data for the game. Should take the place of any would-be
 //! hard-coded constants.
 
-use crate::fish::Species;
+use crate::environment::fish::Species;
 use bevy::prelude::*;
 use std::time::Duration;
 

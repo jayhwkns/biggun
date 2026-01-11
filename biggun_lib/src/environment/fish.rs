@@ -1,7 +1,11 @@
 use crate::physics::Velocity;
 use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
-use crate::{config::Config, hook::Hook, physics, state::GameState};
+use crate::{
+    game_manager::{config::Config, state::GameState},
+    player::hook::Hook,
+    utils::units::{Inches, Ounces},
+};
 
 #[derive(Clone)]
 enum Direction {
@@ -211,7 +215,7 @@ impl Fish {
             } else {
                 Anchor::CENTER_RIGHT
             },
-            physics::Velocity(Vec2::new(speed * invert, 0.)),
+            Velocity(Vec2::new(speed * invert, 0.)),
         ));
     }
 }

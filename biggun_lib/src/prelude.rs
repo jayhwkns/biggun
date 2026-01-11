@@ -1,11 +1,12 @@
 //! A collection of all plugins and needed types for the game's `main` function
 
 pub use crate::{
-    config::Config,
-    fish::{self, Fish},
-    hook::{self, Hook},
+    environment::fish::Fish,
+    game_manager::{
+        config::Config,
+        scenes::BiggunScenePlugin,
+        state::{CountdownTimer, Floor, GameState, GameStateManagerPlugin},
+    },
     input, physics,
-    scenes::BiggunScenePlugin,
-    state::{self, CountdownTimer, Floor, GameState, GameStateManagerPlugin},
-    ui::{self, MainMenuItem},
+    player::hook::Hook,
 };
