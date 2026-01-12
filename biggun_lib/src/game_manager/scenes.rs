@@ -20,14 +20,6 @@ use super::{
 };
 use bevy_prototype_lyon::prelude::*;
 
-pub struct BiggunScenePlugin;
-
-impl Plugin for BiggunScenePlugin {
-    fn build(&self, app: &mut App) {
-        app;
-    }
-}
-
 /// Loads into the main menu
 pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<Config>) {
     // Camera
