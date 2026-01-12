@@ -1,13 +1,13 @@
 //! Movable hook and all related player components
 
 use crate::{
-    environment::fish::{self, Fish},
+    environment::fish::{self, Fish, Hooked},
     game_manager::{config::Config, state::GameState},
     physics::Velocity,
     utils::ui::ScoreDisplay,
 };
 
-use bevy::prelude::*;
+use bevy::{ecs::world::DeferredWorld, prelude::*};
 
 /// Controllable hook when fishing
 #[derive(Component)]
@@ -76,8 +76,8 @@ pub fn handle_input(
 /// Extracts a hooked fish when the hook reaches the surface and adds to score
 pub fn check_extraction(
     mut commands: Commands,
-    hook_transform: Single<(&mut Transform, &mut Hook), Without<fish::Hooked>>,
-    hooked_fish: Single<(Entity, &Fish, &Transform), With<fish::Hooked>>,
+    hook_transform: Single<(&mut Transform, &mut Hook), Without<Hooked>>,
+    hooked_fish: Single<(Entity, &Fish), With<Hooked>>,
     mut state: ResMut<GameState>,
     score_display: Single<&mut Text, With<ScoreDisplay>>,
     config: Res<Config>,
@@ -85,11 +85,11 @@ pub fn check_extraction(
     // How close the hook mut be to the surface of the water to register the
     // extraction
     const SURFACE_DIST: f32 = 0.1;
-    let (entity, hooked_fish, transform) = hooked_fish.into_inner();
+    let (entity, hooked_fish) = hooked_fish.into_inner();
     let (mut hook_transform, mut hook) = hook_transform.into_inner();
     let mut score_display = score_display.into_inner();
 
-    if transform.translation.y >= config.water_level - SURFACE_DIST {
+    if hook_transform.translation.y >= config.water_level - SURFACE_DIST {
         // Extraction has occured
         state.score += hooked_fish.get_score();
         score_display.0 = format!("SCORE {:08}", state.score);
@@ -97,4 +97,39 @@ pub fn check_extraction(
         hook_transform.translation = Vec3::new(0., config.water_level, 0.);
         hook.hooked = false;
     }
+}
+
+/// Occurs between a hook and a fish when a hook touches a fish.
+#[derive(Event)]
+pub struct HookEvent {
+    // TODO: There doesn't seem to be a way to guarantee that hook_entity
+    // has a `Hook` and fish_entity has a `Fish`. Could panic if we really
+    // fuck up. Maybe make a constructor?
+    pub hook_entity: Entity,
+    pub fish_entity: Entity,
+}
+
+/// Connects fish and hook
+pub fn on_hook_event(event: On<HookEvent>, mut commands: Commands, mut world: DeferredWorld) {
+    let event = event.event();
+    commands
+        .entity(event.hook_entity)
+        .add_child(event.fish_entity);
+    commands.entity(event.fish_entity).insert(Hooked);
+
+    let mut fish_entity_mut = world.entity_mut(event.fish_entity);
+    let fish_velocity: &mut Velocity = &mut fish_entity_mut
+        .get_mut::<Velocity>()
+        .expect("Guarenteed by #[require]");
+    fish_velocity.0 = Vec2::ZERO;
+    let fish_transform: &mut Transform = &mut fish_entity_mut
+        .get_mut::<Transform>()
+        .expect("Guarenteed by #[require]");
+    fish_transform.translation = Vec3::ZERO;
+    let fish: &mut Fish = &mut fish_entity_mut.get_mut::<Fish>().unwrap();
+    fish.state.hooked = true;
+
+    let mut hook_entity_mut = world.entity_mut(event.hook_entity);
+    let hook: &mut Hook = &mut hook_entity_mut.get_mut::<Hook>().unwrap();
+    hook.hooked = true;
 }

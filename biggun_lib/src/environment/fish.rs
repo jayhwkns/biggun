@@ -31,6 +31,7 @@ enum Heading {
 }
 
 #[derive(Component)]
+#[require(Transform, Velocity)]
 pub struct Fish {
     stats: FishStats,
     species: &'static Species,
@@ -313,7 +314,7 @@ pub fn handle_spawn(
 
 /// Moves and despawns fish
 pub fn update_fish(
-    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<Hook>>,
+    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<Hooked>>,
     hook_single: Single<(&Transform, &mut Hook), Without<Fish>>,
     mut commands: Commands,
     config: Res<Config>,
@@ -330,11 +331,6 @@ pub fn update_fish(
                 // TODO: Lose life when hooked fish escapes
                 hook.hooked = false;
             }
-            continue;
-        }
-
-        if fish.state.hooked {
-            transform.translation = hook_transform.translation;
             continue;
         }
 
