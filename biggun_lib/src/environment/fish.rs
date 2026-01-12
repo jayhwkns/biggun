@@ -3,7 +3,11 @@ use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
 use crate::{
     game_manager::{config::Config, state::GameState},
+<<<<<<< HEAD
     player::hook::{Hook, HookedObjects},
+=======
+    player::hook::Hook,
+>>>>>>> 26d6800 (Refactored Modules into a seperated Library (#1))
     utils::units::{Inches, Ounces},
 };
 
@@ -315,7 +319,11 @@ pub fn handle_spawn(
 
 /// Moves and despawns fish
 pub fn update_fish(
+<<<<<<< HEAD
     fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<HookedBy>>,
+=======
+    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<Hooked>>,
+>>>>>>> 26d6800 (Refactored Modules into a seperated Library (#1))
     hook_single: Single<(&Transform, &mut Hook), Without<Fish>>,
     mut commands: Commands,
     config: Res<Config>,
