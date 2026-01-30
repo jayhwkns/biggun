@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    environment::fish::{Fish, Hooked},
+    environment::fish::Fish,
     player::hook::{Hook, HookEvent},
 };
 
@@ -41,13 +41,13 @@ pub fn check_hook_fish_collision(
     }
 
     let hook_position = hook_transform.translation;
-    for (entity, transform) in &mut fish_query {
-        let fish_position = transform.translation;
+    for (fish_entity, fish_transform) in &mut fish_query {
+        let fish_position = fish_transform.translation;
         let dist = fish_position.distance(hook_position);
         if dist < hook.catch_radius {
             commands.trigger(HookEvent {
-                hook_entity: hook_entity,
-                fish_entity: entity,
+                hook_entity,
+                fish_entity,
             });
             return;
         }

@@ -7,7 +7,7 @@ use crate::{
     utils::ui::ScoreDisplay,
 };
 
-use bevy::{ecs::world::DeferredWorld, prelude::*};
+use bevy::prelude::*;
 
 /// Controllable hook when fishing
 #[derive(Component)]
@@ -102,34 +102,42 @@ pub fn check_extraction(
 /// Occurs between a hook and a fish when a hook touches a fish.
 #[derive(Event)]
 pub struct HookEvent {
-    // TODO: There doesn't seem to be a way to guarantee that hook_entity
-    // has a `Hook` and fish_entity has a `Fish`. Could panic if we really
-    // fuck up. Maybe make a constructor?
     pub hook_entity: Entity,
     pub fish_entity: Entity,
 }
 
 /// Connects fish and hook
-pub fn on_hook_event(event: On<HookEvent>, mut commands: Commands, mut world: DeferredWorld) {
+pub fn on_hook_event(
+    event: On<HookEvent>,
+    mut commands: Commands,
+    mut fish_query: Query<(&mut Fish, &mut Transform, &mut Velocity)>,
+    mut hook_query: Query<&mut Hook>,
+) {
     let event = event.event();
     commands
         .entity(event.hook_entity)
         .add_child(event.fish_entity);
     commands.entity(event.fish_entity).insert(Hooked);
 
-    let mut fish_entity_mut = world.entity_mut(event.fish_entity);
-    let fish_velocity: &mut Velocity = &mut fish_entity_mut
-        .get_mut::<Velocity>()
-        .expect("Guarenteed by #[require]");
-    fish_velocity.0 = Vec2::ZERO;
-    let fish_transform: &mut Transform = &mut fish_entity_mut
-        .get_mut::<Transform>()
-        .expect("Guarenteed by #[require]");
-    fish_transform.translation = Vec3::ZERO;
-    let fish: &mut Fish = &mut fish_entity_mut.get_mut::<Fish>().unwrap();
-    fish.state.hooked = true;
+    if let Ok((mut fish, mut fish_transform, mut fish_velocity)) =
+        fish_query.get_mut(event.fish_entity)
+    {
+        fish_velocity.0 = Vec2::ZERO;
+        fish_transform.translation = Vec3::ZERO;
+        fish.state.hooked = true;
+    } else {
+        warn!(
+            "Hook event called on a non-existent Fish: {}",
+            event.fish_entity
+        );
+    }
 
-    let mut hook_entity_mut = world.entity_mut(event.hook_entity);
-    let hook: &mut Hook = &mut hook_entity_mut.get_mut::<Hook>().unwrap();
-    hook.hooked = true;
+    if let Ok(mut hook) = hook_query.get_mut(event.hook_entity) {
+        hook.hooked = true;
+    } else {
+        warn!(
+            "Hook event called on a non-existent Hook: {}",
+            event.hook_entity
+        );
+    }
 }
