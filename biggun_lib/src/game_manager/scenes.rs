@@ -5,7 +5,7 @@ use crate::{
     physics::Velocity,
     player::{
         fisherman::{Fisherman, FishingLine, Rod},
-        hook::Hook,
+        hook::{Hook, HookedObjects},
     },
     utils::ui::{MainMenuItem, ScoreDisplay},
 };

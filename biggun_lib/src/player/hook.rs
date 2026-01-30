@@ -1,7 +1,7 @@
 //! Movable hook and all related player components
 
 use crate::{
-    environment::fish::{self, Fish, Hooked},
+    environment::fish::{self, Fish, HookedBy},
     game_manager::{config::Config, state::GameState},
     physics::Velocity,
     utils::ui::ScoreDisplay,
@@ -24,6 +24,10 @@ pub struct Hook {
     pub catch_radius: f32,
 }
 
+#[derive(Component)]
+#[relationship_target(relationship = HookedBy)]
+pub struct HookedObjects(Vec<Entity>);
+
 impl Hook {
     pub fn start_pos(config: &Config) -> Vec3 {
         Vec3::new(0.0, config.water_level, 0.0)
@@ -34,7 +38,7 @@ impl Hook {
 pub fn handle_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     hook: Single<(&mut Velocity, &Transform, &Hook)>,
-    hooked_fish: Option<Single<&Fish, With<fish::Hooked>>>,
+    hooked_fish: Option<Single<&Fish, With<fish::HookedBy>>>,
     config: Res<Config>,
     state: Res<GameState>,
 ) {
@@ -76,8 +80,8 @@ pub fn handle_input(
 /// Extracts a hooked fish when the hook reaches the surface and adds to score
 pub fn check_extraction(
     mut commands: Commands,
-    hook_transform: Single<(&mut Transform, &mut Hook), Without<Hooked>>,
-    hooked_fish: Single<(Entity, &Fish), With<Hooked>>,
+    hook_transform: Single<(&mut Transform, &mut Hook), Without<HookedBy>>,
+    hooked_fish: Single<(Entity, &Fish), With<HookedBy>>,
     mut state: ResMut<GameState>,
     score_display: Single<&mut Text, With<ScoreDisplay>>,
     config: Res<Config>,
@@ -117,7 +121,9 @@ pub fn on_hook_event(
     commands
         .entity(event.hook_entity)
         .add_child(event.fish_entity);
-    commands.entity(event.fish_entity).insert(Hooked);
+    commands
+        .entity(event.fish_entity)
+        .insert(HookedBy(event.hook_entity));
 
     if let Ok((mut fish, mut fish_transform, mut fish_velocity)) =
         fish_query.get_mut(event.fish_entity)

@@ -3,7 +3,7 @@ use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
 use crate::{
     game_manager::{config::Config, state::GameState},
-    player::hook::Hook,
+    player::hook::{Hook, HookedObjects},
     utils::units::{Inches, Ounces},
 };
 
@@ -41,7 +41,8 @@ pub struct Fish {
 /// Partially redundant with Fish.state.hooked, so that we can easily query for
 /// a single hooked fish.
 #[derive(Component)]
-pub struct Hooked;
+#[relationship(relationship_target = HookedObjects)]
+pub struct HookedBy(pub Entity);
 
 impl Fish {
     fn extra_strength(&self) -> f32 {
@@ -314,7 +315,7 @@ pub fn handle_spawn(
 
 /// Moves and despawns fish
 pub fn update_fish(
-    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<Hooked>>,
+    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<HookedBy>>,
     hook_single: Single<(&Transform, &mut Hook), Without<Fish>>,
     mut commands: Commands,
     config: Res<Config>,
@@ -343,7 +344,7 @@ pub fn update_fish(
 }
 
 /// Allows fish to periodically change direction using random timers
-pub fn struggle(fish_query: Single<&mut Fish, With<Hooked>>, time: Res<Time>) {
+pub fn struggle(fish_query: Single<&mut Fish, With<HookedBy>>, time: Res<Time>) {
     let mut fish = fish_query.into_inner();
     if fish.state.timer.is_finished() {
         let new_interval: f32 = (fish.species.struggle_time * rand::random::<f32>())
