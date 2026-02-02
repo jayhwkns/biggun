@@ -109,6 +109,7 @@ pub fn check_extraction(
         // Extraction has occured
         state.score += hooked_fish.get_score();
         score_display.0 = format!("SCORE {:08}", state.score);
+        state.fish_count -= 1;
         commands.entity(entity).despawn();
         hook_transform.translation = Vec3::new(0., config.water_level, 0.);
         hook.hooked = false;

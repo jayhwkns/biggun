@@ -2,7 +2,6 @@
 
 pub mod environment;
 pub mod game_manager;
-pub mod input;
 pub mod physics;
 pub mod player;
 pub mod prelude;

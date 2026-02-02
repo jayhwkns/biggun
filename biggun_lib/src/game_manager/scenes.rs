@@ -232,6 +232,7 @@ pub fn load_game(
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),
         ScoreDisplay,
+        SceneVolatile,
     ));
 
     // Target score
@@ -246,6 +247,7 @@ pub fn load_game(
         TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),
+        SceneVolatile,
     ));
 
     // Countdown
@@ -264,6 +266,7 @@ pub fn load_game(
         CountdownTimer {
             timer: Timer::new(config.sample_stage.time, TimerMode::Once),
         },
+        SceneVolatile,
     ));
 
     // Left blind

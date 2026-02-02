@@ -380,7 +380,6 @@ pub fn on_fish_escape(
     state.fish_count -= 1;
 
     if let Ok(Some(_)) = fish_query.get(entity) {
-        info!("Hook lost!");
         commands.trigger(HookLostEvent);
     }
 }

@@ -1,7 +1,7 @@
 //! Contain and manipulate game state and score
 use std::time::Duration;
 
-use crate::environment::fish::Fish;
+use crate::{environment::fish::Fish, game_manager::scenes::SceneTransitionEvent};
 
 use super::config::{Config, StageConfig};
 
@@ -117,11 +117,11 @@ pub fn stage_transition(
 pub fn handle_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
-    state: Res<GameState>,
+    mut state: ResMut<GameState>,
 ) {
-    info!("{}", state.started);
     if keyboard_input.just_pressed(KeyCode::Enter) && !state.started {
         commands.trigger(SceneTransitionEvent);
         commands.trigger(StartGameEvent);
+        *state = GameState::default();
     }
 }
