@@ -2,6 +2,7 @@
 
 use crate::{
     environment::fish::SpawnHandler,
+    game_manager::state::GameOverEvent,
     physics::Velocity,
     player::{
         fisherman::{Fisherman, FishingLine, Rod},
@@ -270,4 +271,37 @@ pub fn load_game(
 
     // Go to next stage
     commands.trigger(NextStageEvent);
+}
+
+pub fn game_over_screen(
+    _: On<GameOverEvent>,
+    mut commands: Commands,
+    mut state: ResMut<GameState>,
+    velocity_query: Query<&mut Velocity>,
+    config: Res<Config>,
+    asset_server: Res<AssetServer>,
+) {
+    state.started = false;
+
+    let font = asset_server.load("kodemono.ttf");
+    let visuals = &config.visuals;
+
+    // "freeze" everything
+    for mut v in velocity_query {
+        v.0 = Vec2::ZERO;
+    }
+
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            top: percent(50),
+            ..default()
+        },
+        Text::new(format!("GAME OVER\n\nFINAL SCORE: {}", state.score)),
+        TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        MainMenuItem,
+    ));
 }

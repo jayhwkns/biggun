@@ -12,6 +12,7 @@ impl Plugin for BiggunGameManagerPlugin {
         app.add_observer(state::stage_transition)
             .add_systems(Update, (state::CountdownTimer::tick, state::handle_input))
             .add_systems(Startup, scenes::load_main_menu)
-            .add_observer(scenes::load_game);
+            .add_observer(scenes::load_game)
+            .add_observer(scenes::game_over_screen);
     }
 }

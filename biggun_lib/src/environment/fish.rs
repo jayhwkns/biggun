@@ -1,4 +1,4 @@
-use crate::physics::Velocity;
+use crate::{physics::Velocity, player::hook::HookLostEvent};
 use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
 use crate::{
@@ -288,6 +288,11 @@ pub struct SpawnHandler {
     pub timer: Timer,
 }
 
+#[derive(Event)]
+pub struct FishEscapedEvent {
+    pub entity: Entity,
+}
+
 pub fn handle_spawn(
     commands: Commands,
     mut spawn_handler: Single<&mut SpawnHandler>,
@@ -315,23 +320,26 @@ pub fn handle_spawn(
 
 /// Moves and despawns fish
 pub fn update_fish(
-    fish_query: Query<(Entity, &mut Fish, &mut Transform, &mut Velocity), Without<HookedBy>>,
-    hook_single: Single<(&Transform, &mut Hook), Without<Fish>>,
+    fish_query: Query<(
+        Entity,
+        &mut Fish,
+        &GlobalTransform,
+        &mut Velocity,
+        Option<&HookedBy>,
+    )>,
     mut commands: Commands,
     config: Res<Config>,
-    mut state: ResMut<GameState>,
     time: Res<Time>,
 ) {
-    let (hook_transform, mut hook) = hook_single.into_inner();
-    for (entity, mut fish, mut transform, mut velocity) in fish_query {
+    const ESCAPE_LENIENCE: f32 = 1.;
+    for (entity, mut fish, transform, mut velocity, hooked_by) in fish_query {
         // Despawn escaped fish
-        if transform.translation.x.abs() > config.game_width + 1. {
-            commands.entity(entity).despawn();
-            state.fish_count -= 1;
-            if fish.state.hooked {
-                // TODO: Lose life when hooked fish escapes
-                hook.hooked = false;
-            }
+        if transform.translation().x.abs() > config.game_width + ESCAPE_LENIENCE {
+            commands.trigger(FishEscapedEvent { entity });
+            continue;
+        }
+
+        if let Some(_) = hooked_by {
             continue;
         }
 
@@ -359,4 +367,20 @@ pub fn struggle(fish_query: Single<&mut Fish, With<HookedBy>>, time: Res<Time>) 
         };
     }
     fish.state.timer.tick(time.delta());
+}
+
+pub fn on_fish_escape(
+    event: On<FishEscapedEvent>,
+    mut commands: Commands,
+    fish_query: Query<Option<&HookedBy>, With<Fish>>,
+    mut state: ResMut<GameState>,
+) {
+    let entity = event.event().entity;
+    commands.entity(entity).despawn();
+    state.fish_count -= 1;
+
+    if let Ok(Some(_)) = fish_query.get(entity) {
+        info!("Hook lost!");
+        commands.trigger(HookLostEvent);
+    }
 }

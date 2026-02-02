@@ -2,7 +2,10 @@
 
 use crate::{
     environment::fish::{self, Fish, HookedBy},
-    game_manager::{config::Config, state::GameState},
+    game_manager::{
+        config::Config,
+        state::{GameOverEvent, GameState},
+    },
     physics::Velocity,
     utils::ui::ScoreDisplay,
 };
@@ -28,6 +31,9 @@ pub struct Hook {
 #[relationship_target(relationship = HookedBy)]
 pub struct HookedObjects(Vec<Entity>);
 
+#[derive(Event)]
+pub struct HookLostEvent;
+
 impl Hook {
     pub fn start_pos(config: &Config) -> Vec3 {
         Vec3::new(0.0, config.water_level, 0.0)
@@ -42,6 +48,10 @@ pub fn handle_input(
     config: Res<Config>,
     state: Res<GameState>,
 ) {
+    if !state.started {
+        return;
+    }
+
     let (mut velocity, transform, hook) = hook.into_inner();
 
     // Set initial horizontal velocity from keyboard input
@@ -146,4 +156,8 @@ pub fn on_hook_event(
             event.hook_entity
         );
     }
+}
+
+pub fn on_hook_lost(_: On<HookLostEvent>, mut commands: Commands) {
+    commands.trigger(GameOverEvent);
 }

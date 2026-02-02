@@ -13,6 +13,9 @@ pub struct StartGameEvent;
 #[derive(Event)]
 pub struct NextStageEvent;
 
+#[derive(Event)]
+pub struct GameOverEvent;
+
 /// Resource data pertaining to the state of the game
 #[derive(Resource)]
 pub struct GameState {
