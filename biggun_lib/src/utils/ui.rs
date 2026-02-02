@@ -4,7 +4,3 @@ use bevy::prelude::*;
 #[derive(Component)]
 #[require(Text)]
 pub struct ScoreDisplay;
-
-/// Despawns on game start
-#[derive(Component)]
-pub struct MainMenuItem;

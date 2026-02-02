@@ -4,6 +4,7 @@ use crate::{
     environment::fish::{self, Fish, HookedBy},
     game_manager::{
         config::Config,
+        scenes::SceneVolatile,
         state::{GameOverEvent, GameState},
     },
     physics::Velocity,
@@ -14,6 +15,7 @@ use bevy::prelude::*;
 
 /// Controllable hook when fishing
 #[derive(Component)]
+#[require(SceneVolatile)]
 pub struct Hook {
     /// How fast you can move the hook horizontally
     pub speed: f32,

@@ -113,9 +113,15 @@ pub fn stage_transition(
     countdown_timer.into_inner().reset_timer(stage.time);
 }
 
-/// Handles state controls such as pausing and starting the game.
-pub fn handle_input(keyboard_input: Res<ButtonInput<KeyCode>>, mut commands: Commands) {
-    if keyboard_input.just_pressed(KeyCode::Enter) {
+/// Handles input by triggering events
+pub fn handle_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    state: Res<GameState>,
+) {
+    info!("{}", state.started);
+    if keyboard_input.just_pressed(KeyCode::Enter) && !state.started {
+        commands.trigger(SceneTransitionEvent);
         commands.trigger(StartGameEvent);
     }
 }

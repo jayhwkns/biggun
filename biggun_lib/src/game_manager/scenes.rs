@@ -6,9 +6,9 @@ use crate::{
     physics::Velocity,
     player::{
         fisherman::{Fisherman, FishingLine, Rod},
-        hook::{Hook, HookedObjects},
+        hook::Hook,
     },
-    utils::ui::{MainMenuItem, ScoreDisplay},
+    utils::ui::ScoreDisplay,
 };
 
 use bevy::{
@@ -20,6 +20,29 @@ use super::{
     state::{self, CountdownTimer, GameState, NextStageEvent, StartGameEvent},
 };
 use bevy_prototype_lyon::prelude::*;
+
+#[derive(Event)]
+pub struct SceneTransitionEvent;
+
+/// Attached entities will despawn on scene transition.
+#[derive(Component)]
+pub struct SceneVolatile;
+
+impl Default for SceneVolatile {
+    fn default() -> SceneVolatile {
+        SceneVolatile
+    }
+}
+
+pub fn on_scene_transition(
+    _: On<SceneTransitionEvent>,
+    volatiles: Query<Entity, With<SceneVolatile>>,
+    mut commands: Commands,
+) {
+    for v in volatiles {
+        commands.entity(v).despawn();
+    }
+}
 
 /// Loads into the main menu
 pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, config: Res<Config>) {
@@ -123,7 +146,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             ..default()
         },
         image_node,
-        MainMenuItem,
+        SceneVolatile,
     ));
 
     commands.spawn((
@@ -137,7 +160,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
         TextFont::from(font.clone()).with_font_size(visuals.info_font_size),
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),
-        MainMenuItem,
+        SceneVolatile,
     ));
 }
 
@@ -147,12 +170,8 @@ pub fn load_game(
     mut commands: Commands,
     mut state: ResMut<GameState>,
     config: Res<Config>,
-    menu_items: Query<Entity, With<MainMenuItem>>,
     asset_server: Res<AssetServer>,
 ) {
-    for item in menu_items {
-        commands.entity(item).despawn();
-    }
     state.started = true;
 
     // Hook
@@ -256,6 +275,7 @@ pub fn load_game(
             scale: Vec3::new(10000., 10000., 1.),
             ..default()
         },
+        SceneVolatile,
     ));
 
     // Right blind
@@ -267,6 +287,7 @@ pub fn load_game(
             scale: Vec3::new(10000., 10000., 1.),
             ..default()
         },
+        SceneVolatile,
     ));
 
     // Go to next stage
@@ -302,6 +323,20 @@ pub fn game_over_screen(
         TextFont::from(font.clone()).with_font_size(visuals.score_font_size),
         TextColor(Color::WHITE),
         TextLayout::new_with_justify(Justify::Center),
-        MainMenuItem,
+        SceneVolatile,
+    ));
+
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::Center,
+            top: percent(66),
+            ..default()
+        },
+        Text::new("press [ENTER] to restart"),
+        TextFont::from(font.clone()).with_font_size(visuals.info_font_size),
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(Justify::Center),
+        SceneVolatile,
     ));
 }

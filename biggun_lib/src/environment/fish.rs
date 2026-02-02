@@ -2,7 +2,7 @@ use crate::{physics::Velocity, player::hook::HookLostEvent};
 use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
 use crate::{
-    game_manager::{config::Config, state::GameState},
+    game_manager::{config::Config, scenes::SceneVolatile, state::GameState},
     player::hook::{Hook, HookedObjects},
     utils::units::{Inches, Ounces},
 };
@@ -31,7 +31,7 @@ enum Heading {
 }
 
 #[derive(Component)]
-#[require(Transform, Velocity)]
+#[require(Transform, Velocity, SceneVolatile)]
 pub struct Fish {
     stats: FishStats,
     species: &'static Species,

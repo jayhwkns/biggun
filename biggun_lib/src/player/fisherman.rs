@@ -1,6 +1,6 @@
 //! Visuals for fisherman and the rod
 use super::hook::Hook;
-use crate::game_manager::config::Config;
+use crate::game_manager::{config::Config, scenes::SceneVolatile};
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use std::f32::consts::PI;
@@ -12,11 +12,11 @@ pub struct Fisherman;
 
 /// Visual rod that follows the hook
 #[derive(Component)]
-#[require(Sprite)]
+#[require(Sprite, SceneVolatile)]
 pub struct Rod;
 
 #[derive(Component)]
-#[require(Shape)]
+#[require(Shape, SceneVolatile)]
 pub struct FishingLine;
 
 /// Makes fisherman follow the hook visually
