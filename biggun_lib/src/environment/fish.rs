@@ -1,4 +1,4 @@
-use crate::{physics::Velocity, player::hook::HookLostEvent};
+use crate::{physics::Velocity, player::hook::HookLostEvent, utils::layers::Layer};
 use bevy::{math::FloatExt, prelude::*, sprite::Anchor};
 
 use crate::{
@@ -208,7 +208,7 @@ impl Fish {
                 ..default()
             },
             Transform {
-                translation: Vec3::new(config.game_width * -invert, y, 1.),
+                translation: Vec3::new(config.game_width * -invert, y, Layer::FISH),
                 scale: Vec3::ONE * scale,
                 ..default()
             },

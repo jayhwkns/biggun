@@ -8,7 +8,7 @@ use crate::{
         state::{GameOverEvent, GameState},
     },
     physics::Velocity,
-    utils::ui::ScoreDisplay,
+    utils::{layers::Layer, ui::ScoreDisplay},
 };
 
 use bevy::prelude::*;
@@ -38,7 +38,7 @@ pub struct HookLostEvent;
 
 impl Hook {
     pub fn start_pos(config: &Config) -> Vec3 {
-        Vec3::new(0.0, config.water_level, 0.0)
+        Vec3::new(0.0, config.water_level, Layer::HOOK)
     }
 }
 

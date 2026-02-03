@@ -8,7 +8,7 @@ use crate::{
         fisherman::{Fisherman, FishingLine, Rod},
         hook::Hook,
     },
-    utils::ui::ScoreDisplay,
+    utils::{layers::Layer, ui::ScoreDisplay},
 };
 
 use bevy::{
@@ -73,7 +73,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             ..default()
         },
         Transform {
-            translation: Vec3::new(0.0, config.water_level, 2.0),
+            translation: Vec3::new(0.0, config.water_level, Layer::WATER),
             ..default()
         },
     ));
@@ -95,7 +95,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             translation: Vec3::new(
                 0.0,
                 config.water_level - config.sample_stage.water_depth,
-                2.0,
+                Layer::WATER,
             ),
             ..default()
         },
@@ -109,7 +109,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             ..default()
         },
         Transform {
-            translation: Vec3::new(0., 62., 1.),
+            translation: Vec3::new(0., 62., Layer::BOAT),
             ..default()
         },
     ));
@@ -121,7 +121,7 @@ pub fn load_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, co
             ..default()
         },
         Transform {
-            translation: Vec3::new(0., config.water_level + 24., 0.),
+            translation: Vec3::new(0., config.water_level + 24., Layer::BG_DECORATIONS),
             ..default()
         },
         Fisherman,
@@ -201,7 +201,7 @@ pub fn load_game(
         },
         Anchor::BOTTOM_RIGHT,
         Transform {
-            translation: Vec3::new(0., config.water_level + 10., 1.),
+            translation: Vec3::new(0., config.water_level + 10., Layer::FISHING_ROD),
             ..default()
         },
         Rod,
@@ -212,6 +212,10 @@ pub fn load_game(
         ShapeBuilder::with(&line)
             .stroke((Color::WHITE, config.visuals.line_width))
             .build(),
+        Transform {
+            translation: Vec3::new(0., 0., Layer::HOOK),
+            ..default()
+        },
         FishingLine,
     ));
 
