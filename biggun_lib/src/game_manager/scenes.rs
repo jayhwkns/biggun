@@ -5,6 +5,7 @@ use crate::{
     game_manager::state::GameOverEvent,
     physics::Velocity,
     player::{
+        OwnedByPlayer, PlayerOwns,
         fisherman::{Fisherman, FishingLine, Rod},
         hook::Hook,
     },
@@ -171,53 +172,59 @@ pub fn load_game(
     mut state: ResMut<GameState>,
     config: Res<Config>,
     asset_server: Res<AssetServer>,
+    players: Query<Entity, With<PlayerOwns>>,
 ) {
     state.started = true;
 
-    // Hook
-    commands.spawn((
-        Sprite {
-            image: asset_server.load("hook.png"),
-            ..default()
-        },
-        Transform {
-            translation: Hook::start_pos(&config),
-            ..default()
-        },
-        Hook {
-            speed: 35.0,
-            reel_speed: 60.0,
-            density: 10.0,
-            hooked: false,
-            catch_radius: 8.,
-        },
-        Velocity(Vec2::ZERO),
-    ));
+    for p in players {
+        commands.spawn((
+            Sprite {
+                image: asset_server.load("rod.png"),
+                ..default()
+            },
+            Anchor::BOTTOM_RIGHT,
+            Transform {
+                translation: Vec3::new(0., config.water_level + 10., Layer::FISHING_ROD),
+                ..default()
+            },
+            Rod,
+            OwnedByPlayer(p),
+        ));
 
-    commands.spawn((
-        Sprite {
-            image: asset_server.load("rod.png"),
-            ..default()
-        },
-        Anchor::BOTTOM_RIGHT,
-        Transform {
-            translation: Vec3::new(0., config.water_level + 10., Layer::FISHING_ROD),
-            ..default()
-        },
-        Rod,
-    ));
+        let line = shapes::Line(Vec2::ZERO, Vec2::new(0.0, -100.0));
+        commands.spawn((
+            ShapeBuilder::with(&line)
+                .stroke((Color::WHITE, config.visuals.line_width))
+                .build(),
+            Transform {
+                translation: Vec3::new(0., 0., Layer::HOOK),
+                ..default()
+            },
+            FishingLine,
+            OwnedByPlayer(p),
+        ));
 
-    let line = shapes::Line(Vec2::ZERO, Vec2::new(0.0, -100.0));
-    commands.spawn((
-        ShapeBuilder::with(&line)
-            .stroke((Color::WHITE, config.visuals.line_width))
-            .build(),
-        Transform {
-            translation: Vec3::new(0., 0., Layer::HOOK),
-            ..default()
-        },
-        FishingLine,
-    ));
+        // Hook
+        commands.spawn((
+            Sprite {
+                image: asset_server.load("hook.png"),
+                ..default()
+            },
+            Transform {
+                translation: Hook::start_pos(&config),
+                ..default()
+            },
+            Hook {
+                speed: 35.0,
+                reel_speed: 60.0,
+                density: 10.0,
+                hooked: false,
+                catch_radius: 8.,
+            },
+            Velocity(Vec2::ZERO),
+            OwnedByPlayer(p),
+        ));
+    }
 
     // UI
     let font = asset_server.load("kodemono.ttf");
