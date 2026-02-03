@@ -22,6 +22,7 @@ impl Plugin for BiggunPlayerPlugin {
         app.add_systems(Update, (hook::handle_input, fisherman::follow_hook))
             .add_systems(FixedUpdate, hook::check_extraction)
             .add_observer(hook::on_hook_event)
-            .add_observer(hook::on_hook_lost);
+            .add_observer(hook::on_hook_lost)
+            .add_observer(fisherman::on_extraction);
     }
 }

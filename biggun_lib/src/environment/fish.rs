@@ -293,6 +293,12 @@ pub struct FishEscapedEvent {
     pub entity: Entity,
 }
 
+#[derive(Event)]
+pub struct FishExtractedEvent {
+    pub fish: Entity,
+    pub player: Entity,
+}
+
 pub fn handle_spawn(
     commands: Commands,
     mut spawn_handler: Single<&mut SpawnHandler>,

@@ -1,13 +1,14 @@
 //! Movable hook and all related player components
 
 use crate::{
-    environment::fish::{self, Fish, HookedBy},
+    environment::fish::{self, Fish, FishExtractedEvent, HookedBy},
     game_manager::{
         config::Config,
         scenes::SceneVolatile,
         state::{GameOverEvent, GameState},
     },
     physics::Velocity,
+    player::OwnedByPlayer,
     utils::{layers::Layer, ui::ScoreDisplay},
 };
 
@@ -92,27 +93,22 @@ pub fn handle_input(
 /// Extracts a hooked fish when the hook reaches the surface and adds to score
 pub fn check_extraction(
     mut commands: Commands,
-    hook_transform: Single<(&mut Transform, &mut Hook), Without<HookedBy>>,
-    hooked_fish: Single<(Entity, &Fish), With<HookedBy>>,
-    mut state: ResMut<GameState>,
-    score_display: Single<&mut Text, With<ScoreDisplay>>,
+    hook_transform: Single<(&Transform, &OwnedByPlayer, &Hook), Without<HookedBy>>,
+    hooked_fish: Single<Entity, With<HookedBy>>,
     config: Res<Config>,
 ) {
     // How close the hook mut be to the surface of the water to register the
     // extraction
     const SURFACE_DIST: f32 = 0.1;
-    let (entity, hooked_fish) = hooked_fish.into_inner();
-    let (mut hook_transform, mut hook) = hook_transform.into_inner();
-    let mut score_display = score_display.into_inner();
+    let fish_entity = hooked_fish.into_inner();
+    let (hook_transform, player, _) = hook_transform.into_inner();
 
     if hook_transform.translation.y >= config.water_level - SURFACE_DIST {
         // Extraction has occured
-        state.score += hooked_fish.get_score();
-        score_display.0 = format!("SCORE {:08}", state.score);
-        state.fish_count -= 1;
-        commands.entity(entity).despawn();
-        hook_transform.translation = Vec3::new(0., config.water_level, 0.);
-        hook.hooked = false;
+        commands.trigger(FishExtractedEvent {
+            fish: fish_entity,
+            player: player.0,
+        });
     }
 }
 

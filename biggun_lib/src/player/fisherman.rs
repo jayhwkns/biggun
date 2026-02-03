@@ -1,6 +1,11 @@
 //! Visuals for fisherman and the rod
 use super::{PlayerOwns, hook::Hook};
-use crate::game_manager::{config::Config, scenes::SceneVolatile};
+use crate::{
+    environment::fish::{Fish, FishExtractedEvent},
+    game_manager::{config::Config, scenes::SceneVolatile},
+    prelude::GameState,
+    utils::ui::ScoreDisplay,
+};
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use std::f32::consts::PI;
@@ -57,4 +62,24 @@ pub fn follow_hook(
     *line.into_inner() = ShapeBuilder::with(&new_line)
         .stroke((Color::WHITE, config.visuals.line_width))
         .build();
+}
+
+pub fn on_extraction(
+    event: On<FishExtractedEvent>,
+    mut commands: Commands,
+    mut state: ResMut<GameState>,
+    fish_query: Query<&Fish>,
+    mut score_display: Single<&mut Text, With<ScoreDisplay>>,
+) {
+    let Ok(fish) = fish_query.get(event.fish) else {
+        warn!(
+            "Extracted fish {} does not exist in query. Was it removed too early?",
+            event.fish
+        );
+        return;
+    };
+    state.score += fish.get_score();
+    score_display.0 = format!("SCORE {:08}", state.score);
+    state.fish_count -= 1;
+    commands.entity(event.fish).despawn();
 }
